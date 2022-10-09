@@ -17,31 +17,31 @@
 package org.tensorflow.lite.examples.objectdetection
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.RectF
+import android.graphics.*
+import android.speech.tts.TextToSpeech
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
-import java.util.LinkedList
-import kotlin.math.max
 import org.tensorflow.lite.task.vision.detector.Detection
+import java.util.*
+import kotlin.math.max
 
-class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs),TextToSpeech.OnInitListener {
 
     private var results: List<Detection> = LinkedList<Detection>()
     private var boxPaint = Paint()
     private var textBackgroundPaint = Paint()
     private var textPaint = Paint()
-
+    private var tts: TextToSpeech? = null
+    public var isAuto:Boolean=true
     private var scaleFactor: Float = 1f
 
     private var bounds = Rect()
 
     init {
         initPaints()
+        tts = TextToSpeech(context, this)
     }
 
     fun clear() {
@@ -100,6 +100,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 
             // Draw text for detected object
             canvas.drawText(drawableText, left, top + bounds.height(), textPaint)
+
+            // speech the text
+            //speakOut(result)
         }
     }
 
@@ -117,5 +120,22 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 
     companion object {
         private const val BOUNDING_RECT_TEXT_PADDING = 8
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            // set US English as language for tts
+            val result = tts!!.setLanguage(Locale.US)
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS","The Language specified is not supported!")
+            }
+        } else {
+            Log.e("TTS", "Initilization Failed!")
+        }
+    }
+    fun speakOut(detection: Detection ){
+        val utteranceId = UUID.randomUUID().toString()
+        tts?.speak(detection.categories[0].label, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+        Thread.sleep(1000)
     }
 }

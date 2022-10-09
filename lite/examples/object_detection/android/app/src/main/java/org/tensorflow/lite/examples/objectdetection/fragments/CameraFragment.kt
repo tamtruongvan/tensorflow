@@ -16,9 +16,12 @@
 package org.tensorflow.lite.examples.objectdetection.fragments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
+import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -36,19 +39,21 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
-import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import org.tensorflow.lite.examples.objectdetection.ObjectDetectorHelper
 import org.tensorflow.lite.examples.objectdetection.R
 import org.tensorflow.lite.examples.objectdetection.databinding.FragmentCameraBinding
 import org.tensorflow.lite.task.vision.detector.Detection
+import java.util.*
 
-class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
+class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener,TextToSpeech.OnInitListener {
 
     private val TAG = "ObjectDetection"
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
+    private var tts: TextToSpeech? = null
+    private var _detections: MutableList<Detection>? = null
 
     private val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
@@ -59,9 +64,14 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
+    private var speaking:Boolean=false
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        tts = TextToSpeech(activity, this)
+    }
 
     override fun onResume() {
         super.onResume()
@@ -161,6 +171,12 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             }
         }
 
+        fragmentCameraBinding.bottomSheetLayout.start.setOnClickListener {
+            _detections?.let {
+                    it1 -> speakOut(it1)
+            }
+        }
+
         // When clicked, change the underlying hardware used for inference. Current options are CPU
         // GPU, and NNAPI
         fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.setSelection(0, false)
@@ -189,6 +205,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                     /* no op */
                 }
             }
+
     }
 
     // Update the values displayed in the bottom sheet. Reset detector.
@@ -312,7 +329,12 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 imageHeight,
                 imageWidth
             )
-
+            //set detections result for use after
+            _detections=results
+            //speak out objects detected
+            if (results != null && fragmentCameraBinding.bottomSheetLayout.swAutoSpeech.isChecked) {
+                speakOut(results)
+            }
             // Force a redraw
             fragmentCameraBinding.overlay.invalidate()
         }
@@ -321,6 +343,32 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     override fun onError(error: String) {
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+        }
+    }
+    fun speakOut(detections: MutableList<Detection> ){
+        Thread(Runnable {
+            detections?.forEach {
+                if(!speaking){
+                    speaking=true
+                    Thread.sleep(1000)
+                    val utteranceId = UUID.randomUUID().toString()
+                    tts?.speak(it.categories[0].label, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+                    speaking=false
+                }
+            }
+        }).start()
+
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            // set US English as language for tts
+            val result = tts!!.setLanguage(Locale.US)
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS","The Language specified is not supported!")
+            }
+        } else {
+            Log.e("TTS", "Initilization Failed!")
         }
     }
 }
