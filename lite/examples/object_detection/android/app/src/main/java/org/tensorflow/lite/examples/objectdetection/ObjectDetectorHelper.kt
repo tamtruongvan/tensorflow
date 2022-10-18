@@ -139,6 +139,8 @@ class ObjectDetectorHelper(
           imageHeight: Int,
           imageWidth: Int
         )
+
+        abstract fun getSystemService(connectivityService: String): Any
     }
 
     companion object {

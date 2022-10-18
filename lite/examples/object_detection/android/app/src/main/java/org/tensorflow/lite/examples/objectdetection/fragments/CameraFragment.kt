@@ -17,8 +17,10 @@ package org.tensorflow.lite.examples.objectdetection.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.AttributeSet
@@ -28,6 +30,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity.*
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -37,17 +41,17 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import org.tensorflow.lite.examples.objectdetection.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import org.tensorflow.lite.examples.objectdetection.ObjectDetectorHelper
-import org.tensorflow.lite.examples.objectdetection.R
 import org.tensorflow.lite.examples.objectdetection.databinding.FragmentCameraBinding
 import org.tensorflow.lite.task.vision.detector.Detection
 import java.util.*
 
-class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener,TextToSpeech.OnInitListener {
+class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, UpdateEventListener,TextToSpeech.OnInitListener {
 
     private val TAG = "ObjectDetection"
 
@@ -65,12 +69,15 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener,TextT
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var speaking:Boolean=false
+    private var updateHelper:UpdateHelper?=null
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         tts = TextToSpeech(activity, this)
+        updateHelper= activity?.let { UpdateHelper(it.applicationContext,this) }
+        updateHelper!!.checkUpdateInfo()
     }
 
     override fun onResume() {
@@ -175,6 +182,10 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener,TextT
             _detections?.let {
                     it1 -> speakOut(it1)
             }
+        }
+
+        fragmentCameraBinding.bottomSheetLayout.download.setOnClickListener{
+            showUpdateView()
         }
 
         // When clicked, change the underlying hardware used for inference. Current options are CPU
@@ -340,6 +351,10 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener,TextT
         }
     }
 
+    override fun getSystemService(connectivityService: String): Any {
+        TODO("Not yet implemented")
+    }
+
     override fun onError(error: String) {
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
@@ -370,5 +385,17 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener,TextT
         } else {
             Log.e("TTS", "Initilization Failed!")
         }
+    }
+    fun showUpdateView(){
+        val intent = Intent(context, UpdateActivity::class.java)
+        startActivity(intent)
+    }
+    fun isNetworkConnected(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return cm.activeNetworkInfo != null
+    }
+
+    override fun onCheckUpdate() {
+        fragmentCameraBinding.bottomSheetLayout.download.visibility=View.VISIBLE
     }
 }

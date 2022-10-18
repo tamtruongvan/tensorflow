@@ -16,10 +16,23 @@
 
 package org.tensorflow.lite.examples.objectdetection
 
+import Data.Version
+import Utils.ReadFileTask
+import Utils.getJsonDataFromAsset
+import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.tensorflow.lite.examples.objectdetection.databinding.ActivityMainBinding
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
+
 
 /**
  * Main entry point into our app. This app follows the single-activity pattern, and all
@@ -33,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
+
     }
 
     override fun onBackPressed() {
@@ -43,5 +57,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
+    }
+    fun isNetworkConnected(): Boolean {
+        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        return cm.activeNetworkInfo != null
     }
 }

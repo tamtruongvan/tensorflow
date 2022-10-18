@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
     ~ Copyright 2022 The TensorFlow Authors. All Rights Reserved.
     ~
     ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,4 +49,5 @@
         <item>EfficientDet Lite1</item>
         <item>EfficientDet Lite2</item>
     </string-array>
+    <string name="UpdateLink">Link</string>
 </resources>
