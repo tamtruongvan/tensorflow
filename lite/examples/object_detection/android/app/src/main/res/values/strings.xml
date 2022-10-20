@@ -49,5 +49,9 @@
         <item>EfficientDet Lite1</item>
         <item>EfficientDet Lite2</item>
     </string-array>
-    <string name="UpdateLink">Link</string>
+    <string name="toast_download_completed">Update is completed</string>
+    <string name="toast_download_processing">Update is processing</string>
+    <string name="ModelFile">models/model.tflite</string>
+    <string name="ModelName">model.txt</string>
+    <string name="VersionUrl">https://dl.dropboxusercontent.com/s/ievycczhe7hxj9o/update.json?dl=0</string>
 </resources>

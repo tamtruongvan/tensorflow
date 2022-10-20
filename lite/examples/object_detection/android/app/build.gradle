@@ -124,5 +124,4 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-task-vision-play-services:0.4.2'
     implementation 'com.google.android.gms:play-services-tflite-gpu:16.0.0'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.mindorks.android:prdownloader:0.6.0'
 }

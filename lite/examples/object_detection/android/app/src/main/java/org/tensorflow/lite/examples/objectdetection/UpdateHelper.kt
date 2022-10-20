@@ -6,8 +6,12 @@ import Utils.getJsonDataFromAsset
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
+import android.media.Image
 import android.net.ConnectivityManager
 import android.os.Build
+import android.view.View
+import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatActivity.CONNECTIVITY_SERVICE
@@ -23,8 +27,8 @@ class UpdateHelper(val context:Context,val updateListener: UpdateEventListener) 
 
     fun checkUpdateInfo(){
         //return Version("2.0","url");
-        val url:String= R.string.UpdateLink.toString()
-        Thread {
+        val url:String= context.getString(R.string.VersionUrl)
+        Thread(Runnable{
             var rf= ReadFileTask();
             rf.getTextFromWeb(url)
             val versionType = object : TypeToken<Version>() {}.type
@@ -32,12 +36,9 @@ class UpdateHelper(val context:Context,val updateListener: UpdateEventListener) 
             var curVersion=getCurrentVersion()
 
             if(curVersion.Version < updateInfo.Version){
-                updateListener?.onCheckUpdate()
+                updateListener?.onCheckUpdate(updateInfo)
             }
-            //runOnUiThread {
-            //update ui
-            //}
-        }.start()
+        }).start()
     }
     fun getCurrentVersion(): Version {
         val json= getJsonDataFromAsset(context,"version.json")
@@ -58,5 +59,5 @@ class UpdateHelper(val context:Context,val updateListener: UpdateEventListener) 
 }
 
 interface UpdateEventListener{
-    fun onCheckUpdate()
+    fun onCheckUpdate(updateVersion:Version)
 }

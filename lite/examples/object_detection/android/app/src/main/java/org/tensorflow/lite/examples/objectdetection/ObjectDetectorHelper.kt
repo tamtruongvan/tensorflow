@@ -15,17 +15,30 @@
  */
 package org.tensorflow.lite.examples.objectdetection
 
+import Utils.FileExist
 import android.content.Context
+import android.content.Context.MODE_APPEND
+import android.content.Context.MODE_PRIVATE
 import android.graphics.Bitmap
+import android.os.Environment
 import android.os.SystemClock
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.NonNull
 import org.tensorflow.lite.gpu.CompatibilityList
+import org.tensorflow.lite.support.common.internal.SupportPreconditions
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
+
 
 class ObjectDetectorHelper(
   var threshold: Float = 0.6f,
@@ -82,24 +95,69 @@ class ObjectDetectorHelper(
 
         optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
 
-        val modelName =
-            when (currentModel) {
+        val modelName =context.getString(R.string.ModelName)
+            /*when (currentModel) {
                 MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
                 MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
                 MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
                 MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
                 else -> "mobilenetv1.tflite"
-            }
+            }*/
 
         try {
-            objectDetector =
-                ObjectDetector.createFromFileAndOptions(context, modelName, optionsBuilder.build())
+            //
+            //var modelFile = "/files" + Environment.getExternalStorageDirectory().toString() + "/" + context.getString(R.string.ModelFile)
+            /*val hl:String="hello world"
+            val fo = context.openFileOutput("tam.txt", MODE_APPEND)
+            fo.write(hl.toByteArray())
+            fo.close()*/
+            var modelFile = context.getString(R.string.ModelName)
+            if(FileExist(context,modelFile) == true){
+                val mappedByteBuffer=loadMappedFile(context,modelFile)
+                objectDetector =
+                    ObjectDetector.createFromBufferAndOptions(
+                        mappedByteBuffer, optionsBuilder.build())
+                Toast.makeText(context, "Using model file on internal store", Toast.LENGTH_LONG).show()
+            }else{
+                objectDetector =
+                    ObjectDetector.createFromFileAndOptions(
+                        context,"model.tflite", optionsBuilder.build())
+                Toast.makeText(context, "Using model file on asset", Toast.LENGTH_LONG).show()
+            }
+
         } catch (e: IllegalStateException) {
             objectDetectorListener?.onError(
                 "Object detector failed to initialize. See error logs for details"
             )
             Log.e("Test", "TFLite failed to load model with error: " + e.message)
         }
+    }
+
+    @Throws(IOException::class)
+    fun loadMappedFile(@NonNull context: Context, @NonNull filePath: String): MappedByteBuffer? {
+        SupportPreconditions.checkNotNull(filePath, "File path cannot be null.")
+        //val file = File(Environment.getExternalStorageDirectory().toString() + "/" + filePath)
+        val file = context.getExternalFilesDir(filePath)
+        if(file==null)return null
+        val var9: MappedByteBuffer
+        try {
+            val inputStream = FileInputStream(file)
+            var9 = try {
+                val fileChannel: FileChannel = inputStream.getChannel()
+                fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, file?.length())
+            } catch (var12: Throwable) {
+                try {
+                    inputStream.close()
+                } catch (var11: Throwable) {
+                    var12.addSuppressed(var11)
+                }
+                throw var12
+            }
+            inputStream.close()
+        } catch (var13: Throwable) {
+            throw var13
+        }
+        return var9
     }
 
     fun detect(image: Bitmap, imageRotation: Int) {

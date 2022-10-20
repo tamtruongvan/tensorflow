@@ -15,6 +15,8 @@
  */
 package org.tensorflow.lite.examples.objectdetection.fragments
 
+import Data.Version
+import Utils.ReadFileTask
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -29,6 +31,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatActivity.*
@@ -44,6 +47,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.tensorflow.lite.examples.objectdetection.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -70,6 +75,7 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, Upda
     private var cameraProvider: ProcessCameraProvider? = null
     private var speaking:Boolean=false
     private var updateHelper:UpdateHelper?=null
+    private lateinit var _updateVersion:Version
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
@@ -388,6 +394,7 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, Upda
     }
     fun showUpdateView(){
         val intent = Intent(context, UpdateActivity::class.java)
+        intent.putExtra("updateUrl",_updateVersion.Url)
         startActivity(intent)
     }
     fun isNetworkConnected(): Boolean {
@@ -395,7 +402,10 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, Upda
         return cm.activeNetworkInfo != null
     }
 
-    override fun onCheckUpdate() {
-        fragmentCameraBinding.bottomSheetLayout.download.visibility=View.VISIBLE
+    override fun onCheckUpdate(updateVersion:Version) {
+        activity?.runOnUiThread(Runnable{
+            fragmentCameraBinding.bottomSheetLayout.download.visibility = View.VISIBLE
+        })
+        _updateVersion=updateVersion
     }
 }
