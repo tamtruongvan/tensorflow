@@ -25,4 +25,5 @@
     <color name="icActive">#FFFFFFFF</color>
     <color name="icFocused">#DDFFFFFF</color>
     <color name="icPressed">#AAFFFFFF</color>
+    <color name="bounding_box_selectec_color">#33AA33</color>
 </resources>

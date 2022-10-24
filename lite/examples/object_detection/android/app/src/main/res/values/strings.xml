@@ -52,6 +52,9 @@
     <string name="toast_download_completed">Update is completed</string>
     <string name="toast_download_processing">Update is processing</string>
     <string name="ModelFile">models/model.tflite</string>
-    <string name="ModelName">model.txt</string>
+    <string name="ModelName">model.tflite</string>
     <string name="VersionUrl">https://dl.dropboxusercontent.com/s/ievycczhe7hxj9o/update.json?dl=0</string>
+    <string name="VersionFile">version.json</string>
+    <string name="WriteToFileFailed">Write to file is failed</string>
+    <string name="Clear_Boundary">Select out the boundary for clear it</string>
 </resources>

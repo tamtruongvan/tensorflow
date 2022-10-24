@@ -44,7 +44,9 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/alt_bottom_sheet_chevron"
-                android:src="@drawable/icn_chevron_up" />
+                android:src="@drawable/icn_chevron_up"
+                android:id="@+id/img_setting"
+                />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -279,14 +281,16 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/bottom_sheet_default_row_margin">
+            android:layout_marginTop="@dimen/bottom_sheet_default_row_margin"
+            android:visibility="gone"
+            >
 
             <TextView
-                android:text="@string/label_models"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/bottom_sheet_text_size"
-                android:textColor="@color/bottom_sheet_text_color" />
+                android:text="@string/label_models"
+                android:textColor="@color/bottom_sheet_text_color"
+                android:textSize="@dimen/bottom_sheet_text_size" />
 
             <androidx.appcompat.widget.AppCompatSpinner
                 android:id="@+id/spinner_model"
@@ -305,11 +309,11 @@
             android:layout_marginTop="@dimen/bottom_sheet_default_row_margin">
 
             <TextView
-                android:text="Update Info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/bottom_sheet_text_size"
-                android:textColor="@color/bottom_sheet_text_color" />
+                android:text="Version"
+                android:textColor="@color/bottom_sheet_text_color"
+                android:textSize="@dimen/bottom_sheet_text_size" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -327,6 +331,13 @@
                     android:src="@drawable/icn_download_32"
                     android:id="@+id/download"
                     android:visibility="invisible"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="verson info"
+                    android:textColor="#33AA00"
+                    android:textSize="@dimen/bottom_sheet_text_size"
+                    android:id="@+id/txt_verson_info"/>
             </LinearLayout>
 
         </RelativeLayout>

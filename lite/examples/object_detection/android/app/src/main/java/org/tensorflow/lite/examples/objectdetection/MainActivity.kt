@@ -19,10 +19,19 @@ package org.tensorflow.lite.examples.objectdetection
 import Data.Version
 import Utils.ReadFileTask
 import Utils.getJsonDataFromAsset
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.graphics.PointF
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -32,6 +41,7 @@ import org.tensorflow.lite.examples.objectdetection.databinding.ActivityMainBind
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
+import org.tensorflow.lite.examples.objectdetection.UpdateHelper
 
 
 /**
@@ -41,7 +51,6 @@ import java.nio.file.Paths
 class MainActivity : AppCompatActivity() {
 
     private lateinit var activityMainBinding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -49,6 +58,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+
+        return super.onCreateView(name, context, attrs)
+    }
     override fun onBackPressed() {
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
             // Workaround for Android Q memory leak issue in IRequestFinishCallback$Stub.
@@ -62,4 +75,7 @@ class MainActivity : AppCompatActivity() {
         val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         return cm.activeNetworkInfo != null
     }
+
+
+
 }

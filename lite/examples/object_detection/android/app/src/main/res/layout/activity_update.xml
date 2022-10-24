@@ -8,20 +8,27 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_centerInParent="true">
+            android:layout_centerInParent="true"
+
+            >
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="update status"
                 android:gravity="center_vertical"
                 android:id="@+id/lb_downloadStatus"
+                android:textColor="#07A607"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat"
+                android:textSize="18dp"
                 />
             <ProgressBar
                 android:id="@+id/progressBar"
@@ -36,6 +43,20 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="Update new version"
+                android:background="#3366FF"
+                android:textColor="#FFFFFF"
+                android:textSize="18dp"
+                />
+            <Button
+                android:id="@+id/btn_BackHome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Back to Home"
+                android:background="#33AA33"
+                android:textColor="#FFFFFF"
+                android:textSize="18dp"
+                android:visibility="gone"
                 />
         </LinearLayout>
 

@@ -18,16 +18,22 @@ package org.tensorflow.lite.examples.objectdetection.fragments
 import Data.Version
 import Utils.ReadFileTask
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.PointF
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.AttributeSet
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -45,6 +51,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.google.gson.Gson
@@ -76,16 +83,25 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, Upda
     private var speaking:Boolean=false
     private var updateHelper:UpdateHelper?=null
     private lateinit var _updateVersion:Version
+    private var _nsvBottomSetting:NestedScrollView?=null
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         tts = TextToSpeech(activity, this)
-        updateHelper= activity?.let { UpdateHelper(it.applicationContext,this) }
-        updateHelper!!.checkUpdateInfo()
-    }
 
+
+        // declare updatehelper object for action update new verson
+        updateHelper= activity?.let { UpdateHelper(it.applicationContext,this) }
+
+
+        // run method checkUpdateInfo for check update new version if have
+        updateHelper!!.checkUpdateInfo()
+        activity?.registerReceiver(onUpdateComplete, IntentFilter(UpdateHelper.ACTION_UPDATE_COMPLETE))
+
+
+    }
     override fun onResume() {
         super.onResume()
         // Make sure that all permissions are still present, since the
@@ -113,10 +129,18 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, Upda
 
         return fragmentCameraBinding.root
     }
+    private var onUpdateComplete: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            fragmentCameraBinding.bottomSheetLayout.download.visibility=View.INVISIBLE
+            fragmentCameraBinding.bottomSheetLayout.txtVersonInfo.text="Version ${_updateVersion.Version}"
+        }
+    }
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
 
         objectDetectorHelper = ObjectDetectorHelper(
             context = requireContext(),
@@ -131,11 +155,28 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, Upda
             setUpCamera()
         }
 
+        // pass width and height of screen to Overlay
+        val displayMetrics = DisplayMetrics()
+        activity?.getWindowManager()?.defaultDisplay?.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        fragmentCameraBinding.overlay.setScaleFullScreen(width,height)
+
         // Attach listeners to UI control widgets
         initBottomSheetControls()
     }
 
     private fun initBottomSheetControls() {
+        //show current version info
+        var version=updateHelper!!.getCurrentVersion()
+        if(version!=null)
+            fragmentCameraBinding.bottomSheetLayout.txtVersonInfo.text="Version ${version.Version}"
+
+        //show settings in bottom when click image setting
+        fragmentCameraBinding.bottomSheetLayout.imgSetting.setOnClickListener{
+            fragmentCameraBinding.bottomSheetLayout.bottomSheetLayout.fullScroll(View.FOCUS_UP)
+            fragmentCameraBinding.bottomSheetLayout.bottomSheetLayout.scrollTo(0,0)
+        }
         // When clicked, lower detection score threshold floor
         fragmentCameraBinding.bottomSheetLayout.thresholdMinus.setOnClickListener {
             if (objectDetectorHelper.threshold >= 0.1) {
@@ -394,7 +435,10 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, Upda
     }
     fun showUpdateView(){
         val intent = Intent(context, UpdateActivity::class.java)
+
+        // pass info of new vertion to UpdateActivity so that storage to local after update success
         intent.putExtra("updateUrl",_updateVersion.Url)
+        intent.putExtra("version",_updateVersion.Version)
         startActivity(intent)
     }
     fun isNetworkConnected(): Boolean {
@@ -407,5 +451,7 @@ class CameraFragment() : Fragment(), ObjectDetectorHelper.DetectorListener, Upda
             fragmentCameraBinding.bottomSheetLayout.download.visibility = View.VISIBLE
         })
         _updateVersion=updateVersion
+
     }
+
 }

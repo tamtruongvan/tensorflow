@@ -24,6 +24,9 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 class UpdateHelper(val context:Context,val updateListener: UpdateEventListener) {
+    companion object {
+        val ACTION_UPDATE_COMPLETE = "tamtruong.com.action.UPDATE_COMPLETE"
+    }
 
     fun checkUpdateInfo(){
         //return Version("2.0","url");
@@ -41,7 +44,7 @@ class UpdateHelper(val context:Context,val updateListener: UpdateEventListener) 
         }).start()
     }
     fun getCurrentVersion(): Version {
-        val json= getJsonDataFromAsset(context,"version.json")
+        val json= getJsonDataFromAsset(context,context.getString(R.string.VersionFile))
         val versionType = object : TypeToken<Version>() {}.type
         return Gson().fromJson(json,versionType)
     }

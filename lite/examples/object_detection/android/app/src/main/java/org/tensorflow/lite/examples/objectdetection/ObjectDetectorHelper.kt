@@ -15,7 +15,7 @@
  */
 package org.tensorflow.lite.examples.objectdetection
 
-import Utils.FileExist
+import Utils.FileModelExist
 import android.content.Context
 import android.content.Context.MODE_APPEND
 import android.content.Context.MODE_PRIVATE
@@ -105,24 +105,18 @@ class ObjectDetectorHelper(
             }*/
 
         try {
-            //
-            //var modelFile = "/files" + Environment.getExternalStorageDirectory().toString() + "/" + context.getString(R.string.ModelFile)
-            /*val hl:String="hello world"
-            val fo = context.openFileOutput("tam.txt", MODE_APPEND)
-            fo.write(hl.toByteArray())
-            fo.close()*/
             var modelFile = context.getString(R.string.ModelName)
-            if(FileExist(context,modelFile) == true){
+            if(FileModelExist(context,modelFile) == true){
                 val mappedByteBuffer=loadMappedFile(context,modelFile)
                 objectDetector =
                     ObjectDetector.createFromBufferAndOptions(
                         mappedByteBuffer, optionsBuilder.build())
-                Toast.makeText(context, "Using model file on internal store", Toast.LENGTH_LONG).show()
+                //Toast.makeText(context, "Using model file on internal store", Toast.LENGTH_LONG).show()
             }else{
                 objectDetector =
                     ObjectDetector.createFromFileAndOptions(
-                        context,"model.tflite", optionsBuilder.build())
-                Toast.makeText(context, "Using model file on asset", Toast.LENGTH_LONG).show()
+                        context,modelFile, optionsBuilder.build())
+                //Toast.makeText(context, "Using model file on asset", Toast.LENGTH_LONG).show()
             }
 
         } catch (e: IllegalStateException) {
