@@ -44,7 +44,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/alt_bottom_sheet_chevron"
-                android:src="@drawable/icn_chevron_up"
+                android:src="@drawable/setting"
                 android:id="@+id/img_setting"
                 />
 
